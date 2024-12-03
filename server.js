@@ -4,6 +4,8 @@ const PORT = process.env.PORT || 8080;
 
 const fastify = Fastify({ logger: true });
 
+fastify.get('/favicon.ico', (req, reply) => reply.code(204).send())
+
 fastify.get('/', async (request, reply) => {
   await hhproxy(request, reply);
 });
