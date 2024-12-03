@@ -1,23 +1,27 @@
-// server.js
+#!/usr/bin/env node
+'use strict';
+
+
 import Fastify from 'fastify';
 import hhproxy from './proxy1.js';
 
 const fastify = Fastify({
-  logger: false,
+  logger: true,
 });
 
-// Register proxy route
-fastify.get('/', hhproxy);
+const PORT = process.env.PORT || 8080;
 
-// Start server
-const start = async () => {
+// Set up the route
+fastify.get('/', async (req, res) => {
+  return proxy(req, res);
+});
+
+// Start the server
+
   try {
-    await fastify.listen(8080);
-    fastify.log.info(`Server running at http://localhost:3000/`);
+    fastify.listen({ host: '0.0.0.0', port: PORT });
+    console.log(`Listening on ${PORT}`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
-};
-
-start();
