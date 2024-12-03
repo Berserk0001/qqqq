@@ -1,11 +1,13 @@
 "use strict";
 
-
+/*
+ * proxy.js
+ * The bandwidth hero proxy handler with integrated modules.
+ */
 import http from "http";
 import https from "https";
 import sharp from "sharp";
 import pick from "./pick.js";
-import UserAgent from 'user-agents';
 
 const DEFAULT_QUALITY = 40;
 const MIN_COMPRESS_LENGTH = 1024;
@@ -84,18 +86,18 @@ function compress(req, res, input) {
   input
     .pipe(transform)
     .on("error", () => {
-          if (!res.headersSent && !infoReceived) {
-            redirect(req, res);
-          }
-        })
+      if (!res.headersSent && !infoReceived) {
+        redirect(req, res);
+      }
+    })
     .on("info", (info) => {
-          infoReceived = true;
-          res.setHeader("content-type", "image/" + format);
-          res.setHeader("content-length", info.size);
-          res.setHeader("x-original-size", req.params.originSize);
-          res.setHeader("x-bytes-saved", req.params.originSize - info.size);
-          res.statusCode = 200;
-        })
+      infoReceived = true;
+      res.setHeader("content-type", "image/" + format);
+      res.setHeader("content-length", info.size);
+      res.setHeader("x-original-size", req.params.originSize);
+      res.setHeader("x-bytes-saved", req.params.originSize - info.size);
+      res.statusCode = 200;
+    })
     .on('data', (chunk) => {
       if (!res.write(chunk)) {
         input.pause();
@@ -106,18 +108,14 @@ function compress(req, res, input) {
     })
     .on('end', () => {
       res.end();
-    })
-    
+    });
 }
 
-// 
+// Main: Proxy
 function hhproxy(req, res) {
   // Extract and validate parameters from the request
   let url = req.query.url;
-  if (!url) return res.send("bandwidth-hero-proxy");
-
-  // Replace the URL pattern
-  url = url.replace(/http:\/\/1\.1\.\d\.\d\/bmi\/(https?:\/\/)?/i, 'http://');
+  if (!url) return res.end("bandwidth-hero-proxy");
 
   // Set request parameters
   req.params = {};
@@ -128,29 +126,26 @@ function hhproxy(req, res) {
 
   // Avoid loopback that could cause server hang.
   if (
-    req.headers["via"] === "1.1 myapp-hero" &&
+    req.headers["via"] === "1.1 bandwidth-hero" &&
     ["127.0.0.1", "::1"].includes(req.headers["x-forwarded-for"] || req.ip)
   ) {
     return redirect(req, res);
   }
 
-//  const parsedUrl = new URL(req.params.url);
-  const userAgent = new UserAgent();
   const options = {
     headers: {
       ...pick(req.headers, ["cookie", "dnt", "referer", "range"]),
-      "user-agent": userAgent.toString(),
+      "user-agent": "Bandwidth-Hero Compressor",
       "x-forwarded-for": req.headers["x-forwarded-for"] || req.ip,
-      via: "1.1 myapp-hero",
+      via: "1.1 bandwidth-hero",
     },
-    //method: 'GET',
     rejectUnauthorized: false // Disable SSL verification
   };
 
-//const requestModule = parsedUrl.protocol === 'https:' ? https : http;
+  const requestModule = url.startsWith('https') ? https : http;
 
   try {
-    let originReq = https.get(req.params.url, options, (originRes) => {
+    let originReq = requestModule.get(url, options, (originRes) => {
       // Handle non-2xx or redirect responses.
       if (
         originRes.statusCode >= 400 ||
@@ -188,15 +183,12 @@ function hhproxy(req, res) {
         });
       }
     });
-
     originReq.end();
   } catch (err) {
     if (err.code === 'ERR_INVALID_URL') {
       return res.statusCode = 400, res.end("Invalid URL");
     }
-    console.error(err);
     redirect(req, res);
-    
   }
 }
 
