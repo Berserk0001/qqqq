@@ -1,9 +1,13 @@
-import app from "./index.js";
-import http from "http";
+import http from 'http';
+import hhproxy from './proxy.js';
 
-const PORT = process.env.PORT || 8080;
+// Create an HTTP server
+const server = http.createServer(hhproxy);
 
-const server = http.createServer(app);
+// Define the port to listen on
+const PORT = 8080;
+
+// Start the server and listen on the specified port
 server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Proxy server listening on port ${PORT}`);
 });
