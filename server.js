@@ -1,16 +1,30 @@
-import http from 'http';
-import hhproxy from './proxy1.js';
+"use strict";
+
+import http from "http";
+import url from "url";
+import proxy from "./proxy1.js";
 
 const PORT = process.env.PORT || 8080;
 
 // Create the HTTP server
 const server = http.createServer((req, res) => {
+  const parsedUrl = url.parse(req.url, true);
+
+  // Handle favicon requests
+  if (parsedUrl.pathname === "/favicon.ico") {
+    res.statusCode = 204;
+    res.end();
+    return;
+  }
+
+  // Attach query parameters to the request object
+  req.query = parsedUrl.query;
 
   // Use the proxy function to handle the request
-  hhproxy(req, res);
+  proxy(req, res);
 });
 
-// Start the server and listen on the specified port
+// Start the server
 server.listen(PORT, () => {
-  console.log(`Proxy server listening on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
