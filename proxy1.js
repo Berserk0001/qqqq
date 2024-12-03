@@ -93,11 +93,9 @@ function compress(req, reply, input) {
       reply.status(200);
     })
     .on('data', (chunk) => {
-      reply.raw.write(chunk);
+      reply.send(chunk);
     })
-    .on('end', () => {
-      reply.raw.end();
-    });
+
 }
 
 // Main: Proxy
@@ -164,15 +162,12 @@ async function hhproxy(req, reply) {
 
         // Use reply.raw.write for bypass
         originRes.on('data', (chunk) => {
-          reply.raw.write(chunk);
+          reply.send(chunk);
         });
 
-        originRes.on('end', () => {
-          reply.raw.end();
-        });
+        
       }
     });
-    originReq.end();
   } catch (err) {
     if (err.code === 'ERR_INVALID_URL') {
       return reply.status(400).send("Invalid URL");
