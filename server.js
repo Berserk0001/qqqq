@@ -1,11 +1,14 @@
 import http from 'http';
 import hhproxy from './proxy1.js';
 
-// Create an HTTP server
-const server = http.createServer(hhproxy);
+const PORT = process.env.PORT || 8080;
 
-// Define the port to listen on
-const PORT = 8080;
+// Create the HTTP server
+const server = http.createServer((req, res) => {
+
+  // Use the proxy function to handle the request
+  proxy(req, res);
+});
 
 // Start the server and listen on the specified port
 server.listen(PORT, () => {
