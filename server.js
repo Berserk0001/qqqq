@@ -1,30 +1,23 @@
-"use strict";
+// server.js
+import Fastify from 'fastify';
+import hhproxy from './proxy1.js';
 
-import http from "http";
-import url from "url";
-import proxy from "./proxy1.js";
+const fastify = Fastify({
+  logger: false,
+});
 
-const PORT = process.env.PORT || 8080;
+// Register proxy route
+fastify.get('/', hhproxy);
 
-// Create the HTTP server
-const server = http.createServer((req, res) => {
-  const parsedUrl = url.parse(req.url, true);
-
-  // Handle favicon requests
-  if (parsedUrl.pathname === "/favicon.ico") {
-    res.statusCode = 204;
-    res.end();
-    return;
+// Start server
+const start = async () => {
+  try {
+    await fastify.listen(8080);
+    fastify.log.info(`Server running at http://localhost:3000/`);
+  } catch (err) {
+    fastify.log.error(err);
+    process.exit(1);
   }
+};
 
-  // Attach query parameters to the request object
-  req.query = parsedUrl.query;
-
-  // Use the proxy function to handle the request
-  proxy(req, res);
-});
-
-// Start the server
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+start();
