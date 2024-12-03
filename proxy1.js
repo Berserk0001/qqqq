@@ -5,7 +5,6 @@
  * The bandwidth hero proxy handler with integrated modules.
  */
 import http from "http";
-import url from "url";
 import https from "https";
 import sharp from "sharp";
 import pick from "./pick.js";
@@ -114,8 +113,6 @@ function compress(req, res, input) {
 
 // Main: Proxy
 function hhproxy(req, res) {
-  const parsedUrl = url.parse(req.url, true);
-  req.query = parsedUrl.query;
   // Extract and validate parameters from the request
   let url = req.query.url;
   if (!url) return res.end("bandwidth-hero-proxy");
