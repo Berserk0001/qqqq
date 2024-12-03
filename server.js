@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 8080;
 const server = http.createServer((req, res) => {
 
   // Use the proxy function to handle the request
-  proxy(req, res);
+  hhproxy(req, res);
 });
 
 // Start the server and listen on the specified port
