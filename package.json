@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "user-agents": "^1.1.374",
-    "express": "^4.21.1",
+    "fastify": "^5.1.0",
     "sharp": "^0.33.5"
   },
   "engines": {
