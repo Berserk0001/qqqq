@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 8080;
 
 // Set up the route
 fastify.get('/', async (req, res) => {
-  return proxy(req, res);
+  return hhproxy(req, res);
 });
 
 // Start the server
